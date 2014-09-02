@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>   
+<beans xmlns="http://www.springframework.org/schema/beans"  
+ xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"  
+ xmlns:p="http://www.springframework.org/schema/p" xmlns:tx="http://www.springframework.org/schema/tx"  
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+ xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd   
+   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd   
+   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd   
+   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">  
+
+<!-- 	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+        <property name="locations">
+            <list>
+                <value>classpath:jdbc.properties</value>
+            </list>
+        </property>
+    </bean>
+     -->
+     <context:property-placeholder location="classpath:jdbc.properties"/>
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+	   <!--  <property name="driverClassName" value="${jdbc.driverClassName}"/>
+	    <property name="url" value="${jdbc.url}"/>
+	    <property name="username" value="${jdbc.username}"/>
+	    <property name="password" value="${jdbc.password}"/> -->
+	    <property name="driverClass" value="${jdbc.driverClassName}"/>
+	    <property name="jdbcUrl" value="${jdbc.url}"/>
+	    <property name="user" value="${jdbc.username}"/>
+	    <property name="password" value="${jdbc.password}"/>
+	     <!-- 初始化时获取三个连接，取值应该在minPoolSize与maxPoolSize之间。Default:3 -->
+			<property name="initialPoolSize" value="3" />
+			<!-- 连接池中保留最小连接数。Default:3 -->
+			<property name="minPoolSize" value="3" />
+			<!-- 连接池中保留最大连接数。Default:15 -->
+			<property name="maxPoolSize" value="15" />
+			<!-- 当连接池中的连接耗尽的时候c3p0一次同时获取的连接数。Default:3 -->
+			<property name="acquireIncrement" value="3" />
+			<!-- 控制数据源内加载的PreparedStatements数量。如果maxStatements与maxStatementsPreConection均为0，则关闭缓存。Default:0 -->
+			<property name="maxStatements" value="8" />
+			<!-- maxStatementsPerConnection定义了连接池内单个连接所拥有的最大缓存statements数。Default:0 -->
+			<property name="maxStatementsPerConnection" value="5" />
+			<!-- 最大空闲时间，1800秒内未使用则连接补丢弃。若为0则永不丢弃。Default:0 -->
+			<property name="maxIdleTime" value="1800" />
+	</bean>
+	 <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+    	<property name="dataSource" ref="dataSource"/>
+    	<!-- xml实体映射使用
+    	<property name="mappingLocations">
+            <value>classpath*:/org/ltsh/**/*.hbm.xml</value> 
+        </property>
+        -->
+          <property name="packagesToScan">
+			<list>
+			     <value>com.test.model</value>
+			</list>
+		</property>
+	    <!-- <property name="hibernateProperties">
+	      <value>
+				hibernate.dialect = org.hibernate.dialect.MySQL5InnoDBDialect
+				hibernate.hbm2ddl.auto = update
+				hibernate.show_sql=true
+	      </value>
+	    </property> -->
+	    <property name="configLocation" value="classpath:hibernate.cfg.xml" />
+  	</bean>
+  	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+  		<property name="sessionFactory" ref="sessionFactory"></property>
+  	</bean>
+	 <!-- 默认的注解映射的支持 -->
+     <context:annotation-config />
+	 <context:component-scan base-package="com.test" />  <!-- 自动扫描该包路径下的所有注解 -->
+	<!-- 事务配置 -->
+    <!-- 定义事务管理器 -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory">
+			<ref local="sessionFactory"/>
+		</property>
+	</bean>
+
+	
+
+	
+</beans>
